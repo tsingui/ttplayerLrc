@@ -15,8 +15,8 @@
         <!-- 过滤日志 -->
         <filter class="ch.qos.logback.classic.filter.LevelFilter">
             <level>INFO</level>
-           <!-- <onMatch>ACCEPT</onMatch>
-            <onMismatch>DENY</onMismatch>-->
+            <onMatch>ACCEPT</onMatch>
+            <onMismatch>DENY</onMismatch>
         </filter>
     </appender>
 
@@ -60,8 +60,8 @@
         <!-- 过滤日志 -->
         <filter class="ch.qos.logback.classic.filter.LevelFilter">
             <level>INFO</level>
-            <!--<onMatch>ACCEPT</onMatch>
-            <onMismatch>DENY</onMismatch>-->
+            <onMatch>ACCEPT</onMatch>
+            <onMismatch>DENY</onMismatch>
         </filter>
     </appender>
 

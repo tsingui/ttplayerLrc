@@ -10,6 +10,7 @@ import com.mashape.unirest.http.HttpResponse;
 import com.mashape.unirest.http.Unirest;
 import com.mashape.unirest.http.exceptions.UnirestException;
 import com.mashape.unirest.request.GetRequest;
+import com.mashape.unirest.request.HttpRequestWithBody;
 import com.mashape.unirest.request.body.MultipartBody;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Test;
@@ -130,7 +131,7 @@ public class Music163MLC implements MusicLrcSearch {
     }
 
     private String searchApi(String text){
-        String temple = "{\"hlpretag\":\"<span class=\\\"s-fc7\\\">\",\"hlposttag\":\"</span>\",\"s\":\"%s\",\"type\":\"1\",\"offset\":\"0\",\"total\":\"true\",\"limit\":\"%s\"}";//
+        String temple = "{\"hlpretag\":\"<span class=\\\"s-fc7\\\">\",\"hlposttag\":\"</span>\",\"s\":\"%s\",\"type\":\"1\",\"offset\":\"0\",\"total\":\"true\",\"limit\":\"%s\"}";
 
         // 未登录只能查找到前20首
         Map<String, String> d_en = d(String.format(temple, text, pageNum)
@@ -140,11 +141,18 @@ public class Music163MLC implements MusicLrcSearch {
         );
         log.debug("params=encText= {}",d_en.get("encText"));
         log.debug("encSecKey=encSecKey= {}",d_en.get("encSecKey"));
-        MultipartBody u = Unirest.post(searchUrl)
+        HttpRequestWithBody request = Unirest.post(searchUrl)
                 .header("Content-Type", "application/x-www-form-urlencoded")
-                .header("cookie", MUSIC_U)
+                .header("User-Agent","Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/93.0.4577.63 Safari/537.36")
+        ;
+        if(StringUtil.notEmpty(MUSIC_U)){
+            request.header("cookie", MUSIC_U);
+        }
+        MultipartBody u = request
+                //.header("cookie", MUSIC_U)
                 .field("params", d_en.get("encText"))
                 .field("encSecKey", d_en.get("encSecKey"));
+
         HttpResponse<String> asString = null;
         try {
             long start = System.currentTimeMillis();
@@ -168,6 +176,9 @@ public class Music163MLC implements MusicLrcSearch {
                 ,(System.currentTimeMillis() - start)/1000.0
                 ,StringUtil.formatSize(sourseData.getBytes(StandardCharsets.UTF_8).length)
         );
+        if(200 != obj.getInteger("code")){
+            log.error("接口返回了异常数据：{}",sourseData);
+        }
         JSONArray songList = obj.getJSONObject("result").getJSONArray("songs");
         for (int i = 0; i < songList.size(); i++) {
             JSONObject songItem = songList.getJSONObject(i);
@@ -284,6 +295,19 @@ public class Music163MLC implements MusicLrcSearch {
             e.printStackTrace();
         }
 
+    }
+
+    @Test
+    public void t004() throws UnirestException {
+        Unirest.setTimeouts(0, 0);
+        HttpResponse<String> response = Unirest.post("https://music.163.com/weapi/cloudsearch/get/web")
+                .header("Content-Type", "application/x-www-form-urlencoded")
+                .header("Cookie", "NMTID=00O6ngI72iOFJcGbkfor5mjZFrOcrgAAAF7yok-PQ; ntes_kaola_ad=1")
+                .header("User-Agent","Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/93.0.4577.63 Safari/537.36")
+                .field("params", "v7WJ502sT6l4CuhhI++3F19x9hk8KeYTJmWxJSDUSqg2sTo363xklvi9gtX5D0mYuHU6tQqjU81hQUPnq3FMNqzu3NUY7AtRM62ayFaJky+ob/mciLMGBxyR6Wt8oxxpbC829kWYBR7ZLVpcIubRIKKbfLP43081s6txB8MhLm9J8SCncfI9BamtkyohsLIllh06flwu7ulyPzVK20tSFgEM3RxnGP+dTX3RPxDO6MdsQMdiCfgaE1EzCl3oyu4l74n4MsLhIcopDE87v0x/Qg==")
+                .field("encSecKey", "ac63ea8b4e59d7ecdaa1b2d0b7df0e2fb7a269bf830b1ee042efbd0704dda31f4ac4c1680ad7505b3c101fc1c21127d0695d67c7c805e6bdd4a941ec11baf459ca9236674876bd450a2b43571dc80e306766c6f7dccbca7328729c4f5b107fab8a7f2bb3879ea2399db5beb2472c232a1b0e1bf3eac7ff29d7eba1415bc81dce")
+                .asString();
+        log.info(response.getBody());
 
     }
 }
