@@ -29,6 +29,14 @@ public class StringUtil {
         }
         return String.format("%.2f %s",out,u[u.length-1]);
     }
+    public static String formatXml(String souText){
+        if(isNull(souText)){
+            return "";
+        }
+        return souText
+                .replace("'","&apos;")
+        ;
+    }
 
 //    public static boolean saveFile(String text, File out){
 //        return saveFile(text,out,Charset.defaultCharset().name());

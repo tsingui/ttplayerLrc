@@ -44,6 +44,7 @@ public class ApiServer {
             List<Map<String, String>> data = searchLrc(artist, title);
             //生成返回数据
             resultData = serarchParse(data);
+            //resultData = returnText();//特殊符号测试
         }else{
             //下载模式
             log.info(JSON.toJSONString(parameter));
@@ -62,7 +63,6 @@ public class ApiServer {
                 }
             }
         }
-
         //测试数据，假数据
         //return makeFalseResult();
         return resultData;
@@ -175,11 +175,24 @@ public class ApiServer {
         for (Map<String,String> song:data){
 //            log.info(JSON.toJSONString(song));
             sb.append(
-                    String.format(resultTemplet,song.get("id"),song.get("artist"),song.get("title"))
+                    String.format(resultTemplet
+                            ,StringUtil.formatXml(song.get("id"))
+                            ,StringUtil.formatXml(song.get("artist"))
+                            ,StringUtil.formatXml(song.get("title"))
+                    )
             );
         }
         sb.append("</result>");
 //        log.info(sb.toString());
         return sb.toString();
+    }
+    //返回特殊符号测试
+    private String returnText(){
+        String result = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
+                "<result>\n" +
+                "\t<lrc id='01' artist='其他符号测试' title='/*-+<>&\"×÷'></lrc>\n" +
+                "\t<lrc id='02' artist='单引号测试' title='&apos;&apos;&apos;&apos;'></lrc>\n" +
+                "</result>\n";
+        return result;
     }
 }
