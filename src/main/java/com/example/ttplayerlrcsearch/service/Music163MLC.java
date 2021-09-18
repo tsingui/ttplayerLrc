@@ -237,7 +237,6 @@ public class Music163MLC implements MusicLrcSearch {
         if(lrcNode==null){
             //lrc = "纯音乐，无歌词";
             log.warn("警告，该歌曲未上传歌词！");
-            lrcNode.get("");
         }else{
             lrc = lrcNode.getString("lyric");
         }
