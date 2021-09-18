@@ -54,12 +54,18 @@ public class ApiServer {
             }else{
                 MusicLrcSearch mlc = entity.getMlc();
                 log.info("歌曲id：{},来源为：{}",entity.getSouId(), mlc.getSearchName());
-                ApiResponse<String> downloadResponse = mlc.download(entity.getSouId());
-                if(downloadResponse.isSuccess()){
-                    resultData = downloadResponse.getData();
-                    log.info("下载成功！歌词大小为 {}",StringUtil.formatSize(resultData.getBytes(StandardCharsets.UTF_8).length));
-                }else{
-                    log.info("下载失败!{}",downloadResponse.getMessage());
+                ApiResponse<String> downloadResponse = null;
+                try {
+                    downloadResponse = mlc.download(entity.getSouId());
+                    if(downloadResponse.isSuccess()){
+                        resultData = downloadResponse.getData();
+                        log.info("下载成功！歌词大小为 {}",StringUtil.formatSize(resultData.getBytes(StandardCharsets.UTF_8).length));
+                    }else{
+                        log.info("下载失败!{}",downloadResponse.getMessage());
+                    }
+                } catch (Exception e) {
+                    log.error("调用download出现错误错误");
+                    e.printStackTrace();
                 }
             }
         }
@@ -88,31 +94,33 @@ public class ApiServer {
             if(searchResult!=null){
                 log.info("查询完成，结果数量为 {} ，耗时：{} ms",searchResult.size(),time/1000.0);
                 result.addAll(searchResult);
+                //内存优化
+                searchResult.clear();
+                searchResult = null;
             }else{
                 log.info("查询出现异常，耗时：{} ms",time/1000.0);
             }
         }
         return result;
     }
-    //格式化传入请求
-    private String showRequest(HttpServletRequest request){
-        StringBuffer sb = new StringBuffer();
-//        Map<String,String> out = new HashMap<>();
-        sb.append(String.format("Url:%s",request.getRequestURL() ));sb.append("\r\n");
-//        out.put("Url",request.getRequestURL());
-        sb.append(String.format("Method:%s",request.getMethod() ));sb.append("\r\n");
-//        out.put("Method",request.getMethod());
-        sb.append(String.format("ContentType:%s",request.getContentType() ));sb.append("\r\n");
-//        out.put("ContentType",request.getContentType());
-
-        Map<String,String> parameter = getParameter(request);
-        sb.append(String.format("parameter:%s",JSON.toJSONString(parameter) ));sb.append("\r\n");
-//        out.put("parameter:",JSON.toJSONString(parameter));
-
-
-//        return JSON.toJSONString(out);
-        return sb.toString();
-    }
+//    //格式化传入请求
+//    private String showRequest(HttpServletRequest request){
+//        StringBuffer sb = new StringBuffer();
+////        Map<String,String> out = new HashMap<>();
+//        sb.append(String.format("Url:%s",request.getRequestURL() ));sb.append("\r\n");
+////        out.put("Url",request.getRequestURL());
+//        sb.append(String.format("Method:%s",request.getMethod() ));sb.append("\r\n");
+////        out.put("Method",request.getMethod());
+//        sb.append(String.format("ContentType:%s",request.getContentType() ));sb.append("\r\n");
+////        out.put("ContentType",request.getContentType());
+//
+//        Map<String,String> parameter = getParameter(request);
+//        sb.append(String.format("parameter:%s",JSON.toJSONString(parameter) ));sb.append("\r\n");
+////        out.put("parameter:",JSON.toJSONString(parameter));
+//
+////        return JSON.toJSONString(out);
+//        return sb.toString();
+//    }
     //获取传入参数
     private Map<String,String> getParameter(HttpServletRequest request){
         Enumeration<String> parameterNames = request.getParameterNames();
@@ -129,8 +137,6 @@ public class ApiServer {
                         ,TtplayTextUtil.decode(val)
                 );
             } catch (Exception e) {
-                //e.printStackTrace();
-//                    log.error(e.getMessage());
                 parameter.put(
                         name
                         ,val
@@ -140,37 +146,9 @@ public class ApiServer {
         return parameter;
     }
 
-    /**
-     * 模拟返回结果，因为未找到可用服务器，所以数据格式参照网络历史文章【https://www.cxyzjd.com/article/weixin_30404405/98108452】
-     * @return
-     */
-    private String makeFalseResult(){
-        String templet = "\t<lrc id='%s' artist='%s' title='%s'></lrc>\r\n";
-        StringBuffer sb = new StringBuffer();
-        /**
-         * <?xml version="1.0" encoding="UTF-8"?>
-         * <result>
-         * 　　<lrc id="70437" artist="胡彦斌" title="男人 KTV"></lrc>
-         * 　　<lrc id="204568" artist="胡彦斌" title="男人KTV"></lrc>
-         * </result>
-         */
-        sb.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
-                "<result>\n");
-        for (int i = 0; i < Math.random()*10+10; i++) {
-            sb.append(
-                    String.format(templet,Math.random(),"歌手测试"+i,"标题测试"+i)
-            );
-        }
-        sb.append("</result>");
-
-        log.info(sb.toString());
-        return sb.toString();
-    }
-
-    private final String resultTemplet = "\t<lrc id='%s' artist='%s' title='%s'></lrc>\r\n";
+    private static final String resultTemplet = "\t<lrc id='%s' artist='%s' title='%s'></lrc>\r\n";
     private String serarchParse(List<Map<String,String>> data){
-        StringBuffer sb = new StringBuffer("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
-                "<result>\n");
+        StringBuffer sb = new StringBuffer("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<result>\n");
 
         for (Map<String,String> song:data){
 //            log.info(JSON.toJSONString(song));
@@ -185,14 +163,5 @@ public class ApiServer {
         sb.append("</result>");
 //        log.info(sb.toString());
         return sb.toString();
-    }
-    //返回特殊符号测试
-    private String returnText(){
-        String result = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
-                "<result>\n" +
-                "\t<lrc id='01' artist='其他符号测试' title='/*-+<>&\"×÷'></lrc>\n" +
-                "\t<lrc id='02' artist='单引号测试' title='&apos;&apos;&apos;&apos;'></lrc>\n" +
-                "</result>\n";
-        return result;
     }
 }

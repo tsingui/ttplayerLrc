@@ -12,11 +12,15 @@
         <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
             <Pattern>%date{yyyy-MM-dd HH:mm:ss.SSS} %-5level[%thread]%logger{56}.%method:%L -%msg%n</Pattern>
         </encoder>
-        <!-- 过滤日志 -->
+        <!-- 过滤日志 只保留 INFO 级别
         <filter class="ch.qos.logback.classic.filter.LevelFilter">
             <level>INFO</level>
             <onMatch>ACCEPT</onMatch>
             <onMismatch>DENY</onMismatch>
+        </filter> -->
+        <!-- 过滤掉 TRACE 和 DEBUG 级别的日志 -->
+        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+            <level>INFO</level>
         </filter>
     </appender>
 
@@ -57,16 +61,20 @@
         <layout class="ch.qos.logback.classic.PatternLayout">
             <pattern>%date{yyyy-MM-dd HH:mm:ss.SSS} %-5level[%thread]%logger{56}.%method:%L -%msg%n</pattern>
         </layout>
-        <!-- 过滤日志 -->
+        <!-- 过滤日志 只保留 INFO 级别
         <filter class="ch.qos.logback.classic.filter.LevelFilter">
             <level>INFO</level>
             <onMatch>ACCEPT</onMatch>
             <onMismatch>DENY</onMismatch>
+        </filter> -->
+        <!-- 过滤掉 TRACE 和 DEBUG 级别的日志 -->
+        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+            <level>INFO</level>
         </filter>
     </appender>
 
     <!-- 为某个包下的所有类的指定Appender 这里也可以指定类名称例如：com.aa.bb.ClassName -->
-    <logger name="com.example.ttplayerlrcsearch" additivity="false">
+    <logger name="ttplayerlrcsearch" additivity="false">
         <level value="${log.root.level}" />
         <!-- 只保留本程序的所有级别日志 -->
         <appender-ref ref="file.all" />

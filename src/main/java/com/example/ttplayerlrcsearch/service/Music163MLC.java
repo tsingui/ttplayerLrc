@@ -194,8 +194,16 @@ public class Music163MLC implements MusicLrcSearch {
 
 //            log.info(JSON.toJSONString(song));
             result.add(song);
+            //内存优化
+            singerList.clear();
+            singerList = null;
         }
 //        log.info("数量：{}",songList.size());
+        //内存优化
+        songList.clear();
+        songList = null;
+        obj.clear();
+        obj = null;
         return result;
     }
     private String arrayJoinSinger(JSONArray arr,String c){
@@ -224,7 +232,19 @@ public class Music163MLC implements MusicLrcSearch {
         String jsonResult = response.getBody();
 
         JSONObject obj = JSON.parseObject(jsonResult);
-        String lrc = obj.getJSONObject("lrc").getString("lyric");
+        JSONObject lrcNode = obj.getJSONObject("lrc");
+        String lrc = null;
+        if(lrcNode==null){
+            //lrc = "纯音乐，无歌词";
+            log.warn("警告，该歌曲未上传歌词！");
+            lrcNode.get("");
+        }else{
+            lrc = lrcNode.getString("lyric");
+        }
+        //内存优化
+        obj.clear();
+        jsonResult = null;
+        response = null;
         return lrc;
     }
 
