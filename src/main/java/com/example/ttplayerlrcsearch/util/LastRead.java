@@ -23,24 +23,12 @@ public class LastRead{
     }
     public String getText(){
         StringBuffer sb = new StringBuffer();
-        //第一部分
-        for (int j = i+1; j < line; j++) {
-            String lineText = data[j];
-            if(lineText!=null){
-                sb.append(lineText);
+        List<String> textList = readTextList();
+        for (int j = 0; j < textList.size(); j++) {
+            sb.append(textList.get(i));
+            if(j+1< textList.size()){
                 sb.append("\r\n");
             }
-        }
-        //第二部分
-        for (int j = 0; j <= i; j++) {
-            String lineText = data[j];
-            if(lineText!=null){
-                sb.append(lineText);
-                sb.append("\r\n");
-            }
-        }
-        if(sb.length()>=2){
-            sb.setLength(sb.length()-2);
         }
         return sb.toString();
     }

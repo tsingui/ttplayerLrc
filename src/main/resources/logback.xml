@@ -10,7 +10,7 @@
     <!--控制台输出 -->
     <appender name="stdout" class="ch.qos.logback.core.ConsoleAppender">
         <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
-            <Pattern>%date{yyyy-MM-dd HH:mm:ss.SSS} %-5level[%thread]%logger{56}.%method:%L -%msg%n</Pattern>
+            <Pattern>%yellow(%date{yyyy-MM-dd HH:mm:ss.SSS}) %highlight(%-5level)[%thread]%green(%logger{56}.%method:%L) - %gray(%msg) %n</Pattern>
         </encoder>
         <!-- 过滤日志 只保留 INFO 级别
         <filter class="ch.qos.logback.classic.filter.LevelFilter">
@@ -59,7 +59,9 @@
         </rollingPolicy>
         <!-- 日志输出的文件的格式 -->
         <layout class="ch.qos.logback.classic.PatternLayout">
-            <pattern>%date{yyyy-MM-dd HH:mm:ss.SSS} %-5level[%thread]%logger{56}.%method:%L -%msg%n</pattern>
+            <!--<pattern>%date{yyyy-MM-dd HH:mm:ss.SSS} %-5level[%thread]%logger{56}.%method:%L -%msg%n</pattern>-->
+            <!-- %black( black )*%red( red )*%green( green )*%yellow( yellow )*%blue( blue )*%magenta( magenta )*%cyan( cyan )*%white( white )*%gray( gray )*%boldRed( boldRed )*%boldGreen( boldGreen )*%boldYellow( boldYellow )*%boldBlue( boldBlue )*%boldMagenta( boldMagenta )*%boldCyan( boldCyan )*%boldWhite( boldWhite )*%highlight( highlight )* -->
+            <Pattern>%yellow(%date{yyyy-MM-dd HH:mm:ss.SSS}) %highlight(%-5level)[%thread]%green(%logger{56}.%method:%L) - %black(%msg) %n</Pattern>
         </layout>
         <!-- 过滤日志 只保留 INFO 级别
         <filter class="ch.qos.logback.classic.filter.LevelFilter">

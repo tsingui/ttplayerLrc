@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>千千静听歌词服务器状态</title>
+  <style type="text/css">
+    *{
+      margin: 0;
+      padding: 0;
+    }
+    body,html{
+      height: 100%;
+      width: 100%;
+    }
+    body,.body,#log{
+      display: flex;
+    }
+    hr{
+      margin: 10px 0;
+    }
+    input,textarea{
+      /*border: 0px;*/
+      outline: none;
+    }
+
+    .body{
+      margin: 10px;
+      flex-grow: 1;
+
+      flex-direction: column;
+    }
+    .infoTable{
+      margin:0 10px;
+    }
+    .baseInfo{
+      position: fixed;
+      width: 100vw;
+      background: white;
+    }
+    .baseInfo>div{
+      display: flex;
+      flex-wrap:wrap;
+    }
+    .baseInfo .checkBox{
+      flex-grow: 1;
+      text-align: right;
+      margin-right: 30px;
+    }
+    .checkBox label{
+      display: inline-block;
+    }
+    .bar{
+      float: left;
+      height: 1rem;
+      width: 100%;
+    }
+    .barVal{
+      text-align: left;
+      height: 3px;
+      background: red;
+      width: 0;
+      /*animation: 10s barValDarw forwards;//infinite*/
+    }
+    @keyframes barValDarw {
+      from {width: 0;}
+      to {width: 100%}
+    }
+    #log{
+      margin-top: 50px;
+      flex-grow: 1;
+      flex-direction: column;
+    }
+    .logText{
+      flex-grow: 1;
+    }
+    .logText span{
+      white-space: nowrap;  /*强制span不换行*/
+      display: inline-block;  /*将span当做块级元素对待*/
+      /* 高度不一致时的对其方式 */
+      vertical-align: text-top;
+    }
+  </style>
+  <script>
+    //https://www.cnblogs.com/colima/p/5339227.html
+    var Ajax={
+      get: function(url, fn) {
+        // XMLHttpRequest对象用于在后台与服务器交换数据
+        var xhr = new XMLHttpRequest();
+        xhr.open('GET', url, true);
+        xhr.onreadystatechange = function() {
+          // readyState == 4说明请求已完成
+          if (xhr.readyState == 4 && xhr.status == 200 || xhr.status == 304) {
+            // 从服务器获得数据
+            fn.call(this, xhr.responseText);
+          }
+        };
+        xhr.send();
+      },
+      // datat应为'a=a1&b=b1'这种字符串格式，在jq里如果data为对象会自动将对象转成这种字符串格式
+      post: function (url, data, fn) {
+        var xhr = new XMLHttpRequest();
+        xhr.open("POST", url, true);
+        // 添加http头，发送信息至服务器时内容编码类型
+        xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+        xhr.onreadystatechange = function() {
+          if (xhr.readyState == 4 && (xhr.status == 200 || xhr.status == 304)) {
+            fn.call(this, xhr.responseText);
+          }
+        };
+        xhr.send(data);
+      }
+    }
+    //https://www.cnblogs.com/tugenhua0707/p/3776808.html
+    Date.prototype.format = function(fmt) {
+      var o = {
+        "M+" : this.getMonth()+1,                 //月份
+        "d+" : this.getDate(),                    //日
+        "h+" : this.getHours(),                   //小时
+        "m+" : this.getMinutes(),                 //分
+        "s+" : this.getSeconds(),                 //秒
+        "q+" : Math.floor((this.getMonth()+3)/3), //季度
+        "S"  : this.getMilliseconds()             //毫秒
+      };
+      if(/(y+)/.test(fmt)) {
+        fmt=fmt.replace(RegExp.$1, (this.getFullYear()+"").substr(4 - RegExp.$1.length));
+      }
+      for(var k in o) {
+        if(new RegExp("("+ k +")").test(fmt)){
+          fmt = fmt.replace(RegExp.$1, (RegExp.$1.length==1) ? (o[k]) : (("00"+ o[k]).substr((""+ o[k]).length)));
+        }
+      }
+      return fmt;
+    }
+  </script>
+  <script>
+    var startTime,serachNum,downloadNUm,autoRefresh=10000;
+
+    function setData(result){
+      let data = JSON.parse(result)["data"];
+      if(data){
+        startTime = data["startTime"]
+        serachNum = data["serachNum"]
+        downloadNUm = data["downloadNUm"]
+      }
+      document.querySelector("#serachNum").innerText = serachNum
+      document.querySelector("#downloadNum").innerText = downloadNUm
+
+      document.querySelector("#runTime").innerText = new Date(startTime).format("yyyy-MM-dd hh:mm:ss")
+
+      document.querySelector(".logText").innerHTML = data["log"]
+
+      startSumTime()
+    }
+    function startSumTime(){
+      let time = new Date().getTime() - new Date(startTime).getTime();
+      time = Math.floor(time/1000);
+      document.querySelector("#time").innerText = formatTime(time)
+
+      //setTimeout(f5,10000)
+      //f5()
+      setTimeout(function (){
+        document.querySelector(".barVal").style.animation = Math.floor(autoRefresh/1000)+"s barValDarw forwards";
+
+        //自动滚动
+        if(document.querySelector("#autoRoll").checked){
+          let bodyElement = document.querySelector("body")
+          //判断元素是否出现了滚动条
+          if(bodyElement.scrollHeight > bodyElement.clientHeight) {
+            //设置滚动条到最底部
+            window.scroll({top:bodyElement.scrollHeight,behavior:'smooth' });//left:0,
+          }
+        }
+      },1)
+    }
+    function formatTime(t){
+      let d0 = "秒 分钟 小时 天".split(" ")
+      let d1 = "60 60 24 0".split(" ")
+
+      let result = "";
+      for (let i = 0; i < d0.length; i++) {
+        let number = t%d1[i];
+        if(isNaN(number))number = t;
+        result = number+" "+d0[i]+" "+result;
+        t = Math.floor(t/d1[i])
+        if(t<1){
+          break;
+        }
+      }
+      return result;
+    }
+
+    function f5(){
+      if(document.querySelector("#autoRefresh").checked){
+        document.querySelector(".barVal").style.animation = "";
+        Ajax.get("info",setData)
+      }
+      setTimeout(f5,autoRefresh)
+    }
+    window.onload = function (){
+      f5()
+    }
+  </script>
+</head>
+<body>
+<div class="body">
+  <div class="baseInfo">
+    <div>
+      <span>服务器运行时间</span><span class="infoTable" id="runTime"></span>[<span class="infoTable" id="time"></span>]
+      <div class="checkBox">
+        <label>
+          <input type="checkbox" id="autoRefresh" checked="checked">
+          <span>自动刷新</span>
+          <span class="bar"><div class="barVal"></div></span>
+        </label>
+        <label>
+          <input type="checkbox" id="autoRoll" checked="checked"><span>自动滚动</span>
+        </label>
+      </div>
+    </div>
+    <div>
+      <span>查询次数</span><span class="infoTable" id="serachNum"></span>
+      <span>下载次数</span><span class="infoTable" id="downloadNum"></span>
+    </div>
+  </div>
+  <div id="log">
+    <hr>
+    <!--<textarea class="logText"></textarea>-->
+    <div class="logText"></div>
+  </div>
+</div>
+</body>
+</html>

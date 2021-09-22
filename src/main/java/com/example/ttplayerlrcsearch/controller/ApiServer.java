@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSON;
 import com.example.ttplayerlrcsearch.entity.ApiResponse;
 import com.example.ttplayerlrcsearch.entity.BuffData;
 import com.example.ttplayerlrcsearch.entity.BuffDataEntity;
+import com.example.ttplayerlrcsearch.entity.ServerRunData;
 import com.example.ttplayerlrcsearch.service.FindAllMLC;
 import com.example.ttplayerlrcsearch.service.MusicLrcSearch;
 import com.example.ttplayerlrcsearch.util.StringUtil;
@@ -45,9 +46,11 @@ public class ApiServer {
             //生成返回数据
             resultData = serarchParse(data);
             //resultData = returnText();//特殊符号测试
+            //记录
+            ServerRunData.addSerachNum();
         }else{
             //下载模式
-            log.info(JSON.toJSONString(parameter));
+            //log.info(JSON.toJSONString(parameter));
             BuffDataEntity entity = BuffData.findId(lrcId);
             if(entity==null){
                 log.info("查询出现问题！");
@@ -68,6 +71,8 @@ public class ApiServer {
                     e.printStackTrace();
                 }
             }
+            //记录
+            ServerRunData.addDownloadNUm();
         }
         //测试数据，假数据
         //return makeFalseResult();

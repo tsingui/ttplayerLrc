@@ -69,9 +69,12 @@ public class StringUtil {
 
     public static String readLastLine(File f,int lineNum){
         LastRead lr = new LastRead(lineNum);
+        return readLastLine(f,lr).getText();
+    }
+    public static LastRead readLastLine(File file,LastRead lr){
         BufferedReader br = null;
         try {
-            br = new BufferedReader(new FileReader(f));
+            br = new BufferedReader(new FileReader(file));
             String buff = null;
             while ((buff=br.readLine())!=null){
                 lr.add(buff);
@@ -83,7 +86,7 @@ public class StringUtil {
         }finally {
             closeSteam(br);
         }
-        return lr.getText();
+        return lr;
     }
 
     //关闭IO流
