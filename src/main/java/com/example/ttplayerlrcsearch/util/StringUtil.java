@@ -38,32 +38,71 @@ public class StringUtil {
         ;
     }
 
-//    public static boolean saveFile(String text, File out){
-//        return saveFile(text,out,Charset.defaultCharset().name());
-//    }
-//    public static boolean saveFile(String text, File out,String charse){
-//        if(!out.exists()){
-//            try {
-//                out.createNewFile();
-//            } catch (IOException e) {
-//                e.printStackTrace();
-//            }
-//        }else if(!out.isFile()){
-//            log.error("保存失败，保存位置错误，{} 不是一个文件",out.getPath());
-//            return false;
-//        }
-//        OutputStreamWriter osw = null;
-//        try {
-//            osw = new OutputStreamWriter(new FileOutputStream(out), charse);
-//            osw.write(text);
-//            osw.flush();
-//        } catch (FileNotFoundException e) {
-//            e.printStackTrace();
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        }finally {
-//            try{if(osw!=null){osw.close();}}catch (Exception e){}
-//        }
-//        return true;
-//    }
+    public static boolean saveFile(String text, File out){
+        return saveFile(text,out, Charset.defaultCharset().name());
+    }
+    public static boolean saveFile(String text, File out,String charse){
+        if(!out.exists()){
+            try {
+                out.createNewFile();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }else if(!out.isFile()){
+            log.error("保存失败，保存位置错误，{} 不是一个文件",out.getPath());
+            return false;
+        }
+        OutputStreamWriter osw = null;
+        try {
+            osw = new OutputStreamWriter(new FileOutputStream(out), charse);
+            osw.write(text);
+            osw.flush();
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }finally {
+            try{if(osw!=null){osw.close();}}catch (Exception e){}
+        }
+        return true;
+    }
+
+    public static String readLastLine(File f,int lineNum){
+        LastRead lr = new LastRead(lineNum);
+        BufferedReader br = null;
+        try {
+            br = new BufferedReader(new FileReader(f));
+            String buff = null;
+            while ((buff=br.readLine())!=null){
+                lr.add(buff);
+            }
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }finally {
+            closeSteam(br);
+        }
+        return lr.getText();
+    }
+
+    //关闭IO流
+    private static void closeSteam(InputStream is){
+        if(is!=null){try{is.close();}catch (Exception e){}}
+    }
+    private static void closeSteam(OutputStream os){
+        if(os!=null){try{os.close();}catch (Exception e){}}
+    }
+    private static void closeSteam(Reader r){
+        if(r!=null){try{r.close();}catch (Exception e){}}
+    }
+    private static void closeSteam(Writer w){
+        if(w!=null){try{w.close();}catch (Exception e){}}
+    }
+
+    @Test
+    public void t001(){
+        String s = readLastLine(new File("./logs/info.log"), 100);
+        saveFile(s,new File("z:/out.txt"));
+    }
 }
