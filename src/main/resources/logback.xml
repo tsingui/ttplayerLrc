@@ -5,12 +5,13 @@
     <property name="log.root.level" value="DEBUG" /> <!-- 日志级别 -->
     <!--日志文件的保存路径,首先查找系统属性-Dlog.dir,如果存在就使用其；否则，在当前目录下创建名为logs目录做日志存放的目录 -->
     <property name="log.base" value="${log.dir:-logs}" />
-    <property name="log.max.size" value="100MB" /> <!-- 日志文件大小,超过这个大小将被压缩 -->
+    <property name="log.max.size" value="10MB" /> <!-- 日志文件大小,超过这个大小将被压缩 -->
 
     <!--控制台输出 -->
     <appender name="stdout" class="ch.qos.logback.core.ConsoleAppender">
         <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
-            <Pattern>%yellow(%date{yyyy-MM-dd HH:mm:ss.SSS}) %highlight(%-5level)[%thread]%green(%logger{56}.%method:%L) - %gray(%msg) %n</Pattern>
+<!--            <Pattern>%yellow(%date{yyyy-MM-dd HH:mm:ss.SSS}) %highlight(%-5level)[%thread]%green(%logger{56}.%method:%L) - %gray(%msg) %n</Pattern>-->
+            <Pattern>%date{yyyy-MM-dd HH:mm:ss.SSS} %-5level[%thread]%logger{56}.%method:%L - %msg %n</Pattern>
         </encoder>
         <!-- 过滤日志 只保留 INFO 级别
         <filter class="ch.qos.logback.classic.filter.LevelFilter">
@@ -49,7 +50,7 @@
             是web项目会保存到Tomcat的bin目录 下 -->
         <!-- 滚动记录文件，先将日志记录到指定文件，当符合某个条件时，将日志记录到其他文件。 -->
         <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-            <FileNamePattern>${log.base}/archive/${log.moduleName}_Info_%d{yyyy-MM-dd}.%i.log.zip
+            <FileNamePattern>${log.base}/archive/Info_%d{yyyy-MM-dd}.%i.log.zip
             </FileNamePattern>
             <!-- 文件输出日志 (文件大小策略进行文件输出，超过指定大小对文件备份) -->
             <timeBasedFileNamingAndTriggeringPolicy
@@ -76,7 +77,7 @@
     </appender>
 
     <!-- 为某个包下的所有类的指定Appender 这里也可以指定类名称例如：com.aa.bb.ClassName -->
-    <logger name="ttplayerlrcsearch" additivity="false">
+    <logger name="com.example.ttplayerlrcsearch" additivity="false">
         <level value="${log.root.level}" />
         <!-- 只保留本程序的所有级别日志 -->
         <appender-ref ref="file.all" />

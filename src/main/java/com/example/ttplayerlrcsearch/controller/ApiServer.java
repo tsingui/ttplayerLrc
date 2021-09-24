@@ -39,6 +39,8 @@ public class ApiServer {
         String title = parameter.get("Title");
         String artist = parameter.get("sh?Artist");
 
+        log.info(JSON.toJSONString(parameter));
+
         String lrcId = parameter.get("dl?Id");
         if(StringUtil.isNull(lrcId)){
             //搜索模式
@@ -126,14 +128,28 @@ public class ApiServer {
 ////        return JSON.toJSONString(out);
 //        return sb.toString();
 //    }
+
+    //不处理的参数
+    private String[] excludeParameters = new String[]{"dl?Id","mac","Code","uid","ci"};
     //获取传入参数
     private Map<String,String> getParameter(HttpServletRequest request){
         Enumeration<String> parameterNames = request.getParameterNames();
         Map<String,String> parameter = new HashMap<>();
-        while (parameterNames.hasMoreElements()){
+        w:while (parameterNames.hasMoreElements()){
             String name = parameterNames.nextElement();
             //获取原始参数
             String val = request.getParameter(name);
+
+            //是否特殊不处理参数
+            for (String key :excludeParameters) {
+                if(key.equalsIgnoreCase(name)){
+                    parameter.put(
+                            name
+                            ,val
+                    );
+                    continue w;
+                }
+            }
             try {
                 //装配参数
                 parameter.put(

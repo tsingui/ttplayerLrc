@@ -15,6 +15,13 @@ public class BuffData {
     //存储索引，快速查找
     static private Map<String,Integer> quickPositioning = new ConcurrentHashMap<>();
 
+    //验证ID
+//    static{
+//        for (int i = 0; i < 1000; i++) {
+//            addId(String.valueOf(i),null);
+//        }
+//    }
+
     public static String addId(String id, MusicLrcSearch mlc){
         Integer key_int = quickPositioning.get(id);
         if(key_int==null){
