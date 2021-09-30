@@ -4,6 +4,13 @@ server:
 MLC:
 #  每个搜索引擎查询的结果数量，如果可用的话
   pageNum: 50
+  trans:
+    # 是否下载双语歌词
+    will_downlad: false
+    # 双语歌词是否译文在前
+    translation_in_first: false
+    # 原文和译文间的连接符。
+    add_str: ' - '
   music163:
     MUSIC_U:
 

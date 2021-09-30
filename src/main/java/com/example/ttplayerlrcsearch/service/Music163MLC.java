@@ -29,7 +29,7 @@ import java.util.*;
 
 @Service
 @Slf4j
-public class Music163MLC implements MusicLrcSearch {
+public class Music163MLC extends LRCDispose implements MusicLrcSearch {
     private static final String searchName = "网易云";
 
     private static final String searchUrl = "https://music.163.com/weapi/cloudsearch/get/web";
@@ -238,7 +238,16 @@ public class Music163MLC implements MusicLrcSearch {
             //lrc = "纯音乐，无歌词";
             log.warn("警告，该歌曲未上传歌词！");
         }else{
+            JSONObject transNode = obj.getJSONObject("tlyric");
             lrc = lrcNode.getString("lyric");
+
+            if(transNode!=null){
+                String trans = transNode.getString("lyric");
+                if(StringUtil.notEmpty(trans)){
+                    lrc = doTrans(lrc,trans);
+                }
+            }
+
         }
         //内存优化
         obj.clear();

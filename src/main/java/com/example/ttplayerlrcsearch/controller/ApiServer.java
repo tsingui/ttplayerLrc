@@ -94,8 +94,8 @@ public class ApiServer {
             try {
                 searchResult = mlc.search(artist, title);
             } catch (Exception e) {
-//                e.printStackTrace();
                 log.error(e.getMessage());
+                e.printStackTrace();
             }
             time = System.currentTimeMillis() - time;
             if(searchResult!=null){

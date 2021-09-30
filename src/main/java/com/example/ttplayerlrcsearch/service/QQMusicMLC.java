@@ -24,7 +24,7 @@ import java.util.regex.Pattern;
 
 @Slf4j
 @Service
-public class QQMusicMLC implements MusicLrcSearch{
+public class QQMusicMLC extends LRCDispose implements MusicLrcSearch {
     private static final String searchName = "QQ音乐";
     @Override
     public String getSearchName() {
@@ -32,7 +32,7 @@ public class QQMusicMLC implements MusicLrcSearch{
     }
 
     private String searchUrl = "https://c.y.qq.com/soso/fcgi-bin/client_search_cp?new_json=1&n=%s&w=%s";
-    private String downlooadUrl = "https://c.y.qq.com/lyric/fcgi-bin/fcg_query_lyric_new.fcg?format=json&inCharset=utf-8&outCharset=utf-8&needNewCode=1&songmid=%s";
+    private String downlooadUrl = "https://c.y.qq.com/lyric/fcgi-bin/fcg_query_lyric_new.fcg?format=json&g_tk=5381&songmid=%s";
 
     private int pageNum = 50;
     @Value("${MLC.pageNum}")
@@ -77,9 +77,13 @@ public class QQMusicMLC implements MusicLrcSearch{
             log.error("该歌曲没有上传歌词！");
         }
         try {
-            result = ApiResponse.returnOK().setDataNow(
-                    new String(Base64.getDecoder().decode(sourseLyric),"UTF-8")
-            );
+            String souText = new String(Base64.getDecoder().decode(sourseLyric),"UTF-8");
+            String transText = null;
+            String transLrc = lrcObj.getString("trans");
+            if(StringUtil.notEmpty(transLrc)){
+                transText = new String(Base64.getDecoder().decode(transLrc),"UTF-8");
+            }
+            result = ApiResponse.returnOK().setDataNow(doTrans(souText,transText));
         } catch (UnsupportedEncodingException e) {
             e.printStackTrace();
             String errMessage = String.format("歌词解析出现异常\r\n%s", sourseLyric);
