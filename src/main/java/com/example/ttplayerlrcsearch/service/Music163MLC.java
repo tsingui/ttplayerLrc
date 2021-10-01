@@ -79,7 +79,16 @@ public class Music163MLC extends LRCDispose implements MusicLrcSearch {
         //注册BouncyCastle，参考：https://blog.csdn.net/qq_29583513/article/details/78866461
         Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());
     }
+    public Music163MLC(){
+        initHeaderMap();
+    }
 
+    private Map<String,String> headerMap = new HashMap<>();
+    private void initHeaderMap() {
+        headerMap.clear();
+        headerMap.put("Content-Type","application/x-www-form-urlencoded");
+        headerMap.put("User-Agent","Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/93.0.4577.63 Safari/537.36");
+    }
 
     //算法参考：https://blog.csdn.net/qq_25816185/article/details/81626499
     // AES 算法
@@ -141,10 +150,7 @@ public class Music163MLC extends LRCDispose implements MusicLrcSearch {
         );
         log.debug("params=encText= {}",d_en.get("encText"));
         log.debug("encSecKey=encSecKey= {}",d_en.get("encSecKey"));
-        HttpRequestWithBody request = Unirest.post(searchUrl)
-                .header("Content-Type", "application/x-www-form-urlencoded")
-                .header("User-Agent","Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/93.0.4577.63 Safari/537.36")
-        ;
+        HttpRequestWithBody request = Unirest.post(searchUrl).headers(headerMap);
         if(StringUtil.notEmpty(MUSIC_U)){
             request.header("cookie", MUSIC_U);
         }
@@ -223,6 +229,7 @@ public class Music163MLC extends LRCDispose implements MusicLrcSearch {
     //下载歌词参考：https://blog.csdn.net/weixin_42742658/article/details/103484096
     private String downloadLrc(String musicId){
         GetRequest getRequest = Unirest.get(String.format(downlooadUrl, musicId));
+        getRequest.headers(headerMap);
         HttpResponse<String> response = null;
         try {
             response = getRequest.asString();
@@ -232,6 +239,10 @@ public class Music163MLC extends LRCDispose implements MusicLrcSearch {
         String jsonResult = response.getBody();
 
         JSONObject obj = JSON.parseObject(jsonResult);
+        Integer code = obj.getInteger("code");
+        if(code !=null && !code.equals(200)){
+            log.warn("警告，接口似乎未返回正确数据：{}",jsonResult);
+        }
         JSONObject lrcNode = obj.getJSONObject("lrc");
         String lrc = null;
         if(lrcNode==null){
