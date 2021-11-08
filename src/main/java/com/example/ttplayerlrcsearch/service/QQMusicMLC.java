@@ -11,6 +11,7 @@ import com.mashape.unirest.http.Unirest;
 import com.mashape.unirest.http.exceptions.UnirestException;
 import com.mashape.unirest.request.GetRequest;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.text.StringEscapeUtils;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -78,10 +79,17 @@ public class QQMusicMLC extends LRCDispose implements MusicLrcSearch {
         }
         try {
             String souText = new String(Base64.getDecoder().decode(sourseLyric),"UTF-8");
+            //xml/html转义处理
+            souText = StringEscapeUtils.unescapeXml(souText);
+            souText = StringEscapeUtils.unescapeHtml4(souText);
+
             String transText = null;
             String transLrc = lrcObj.getString("trans");
             if(StringUtil.notEmpty(transLrc)){
                 transText = new String(Base64.getDecoder().decode(transLrc),"UTF-8");
+                //xml/html转义处理
+                transText = StringEscapeUtils.unescapeXml(transText);
+                transText = StringEscapeUtils.unescapeHtml4(transText);
             }
             result = ApiResponse.returnOK().setDataNow(doTrans(souText,transText));
         } catch (UnsupportedEncodingException e) {
